@@ -11,3 +11,6 @@ MONTECARLO simulation for returns
 
 Project C
 Compare strategies using Sharpe ratio or drawdowns
+
+Final project
+Machine learning model (LSTM, transformer, or feature-rich regression)
