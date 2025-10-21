@@ -25,7 +25,7 @@ iowa_model.fit(train_X, train_y)
 # Make validation predictions and calculate mean absolute error
 val_predictions = iowa_model.predict(val_X)
 val_mae = mean_absolute_error(val_predictions, val_y)
-print("Validation MAE: {:,.0f}".format(val_mae))
+print("Validation MAE when not specifying max_leaf_nodes: {:,.0f}".format(val_mae))
 
 print("\nSetup complete")
 
@@ -46,7 +46,11 @@ scores = {leaf_size: get_mae(leaf_size, train_X, val_X, train_y, val_y) for leaf
 best_tree_size = min(scores, key=scores.get)
 print(best_tree_size)
 
-final_model = DecisionTreeRegressor(random_state=1, max_leaf_nodes=100)
+final_model = DecisionTreeRegressor(max_leaf_nodes=100, random_state=1)
 final_model.fit(X, y)
+val_predictions = final_model.predict(val_X)
+val_mae = mean_absolute_error(val_predictions, val_y)
+print("Validation MAE for best value of max_leaf_nodes: {:,.0f}".format(val_mae))
+
 print(final_model.predict(X.head()))
 print(y.head())
