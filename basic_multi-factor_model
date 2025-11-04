@@ -1,0 +1,29 @@
+import pandas_datareader.data as web
+import pandas as pd
+import datetime as dt
+
+start = dt.datetime(2018, 1, 1)
+end = dt.datetime(2024, 12, 31)
+
+# Example: Apple returns
+stock = web.DataReader("AAPL", "yahoo", start, end)["Adj Close"]
+stock = stock.pct_change().dropna()
+
+# Market & risk-free (Fama-French 3-Factor)
+ff = web.DataReader("F-F_Research_Data_Factors_daily", "famafrench", start, end)[0]
+ff = ff / 100  # convert % to decimals
+
+# Align data
+data = pd.concat([stock, ff], axis=1).dropna()
+data.columns = ["AAPL", "Mkt-RF", "SMB", "HML", "RF"]
+data["Excess_AAPL"] = data["AAPL"] - data["RF"]
+import statsmodels.api as sm
+
+X = data[["Mkt-RF", "SMB", "HML"]]  # independent variables (factors)
+y = data["Excess_AAPL"]             # dependent variable (excess stock return)
+
+X = sm.add_constant(X)  # adds intercept for alpha
+model = sm.OLS(y, X).fit()
+print(model.summary())
+window = 252  # 1-year window
+rolling_betas = data[["Mkt-RF", "SMB", "HML"]].rolling(window).apply(lambda x: sm.OLS(y.loc[x.index], sm.add_constant(x)).fit().params["Mkt-RF"])
