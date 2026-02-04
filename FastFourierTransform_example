@@ -1,0 +1,43 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Configuración de la señal
+fs = 1000                  # Frecuencia de muestreo (Hz)
+t = np.arange(0, 1, 1/fs)  # Vector de tiempo (1 segundo)
+
+# Creamos una señal con dos frecuencias: 50Hz y 120Hz
+signal = np.sin(2 * np.pi * 50 * t) + np.sin(2 * np.pi * 120 * t)
+
+# Añadimos ruido blanco
+noise = np.random.normal(0, 2, len(t))
+signal_noisy = signal + noise
+
+# 2. Cálculo de la FFT
+n = len(t)
+f_hat = np.fft.fft(signal_noisy)         # Calcula la FFT
+psd = f_hat * np.conj(f_hat) / n         # Densidad espectral de potencia (Power Spectrum)
+freqs = np.fft.fftfreq(n, d=1/fs)        # Vector de frecuencias
+L = np.where(freqs > 0)                  # Solo nos interesa la mitad positiva
+
+# 3. Visualización
+plt.figure(figsize=(12, 6))
+
+# Gráfico del dominio del tiempo (Señal ruidosa)
+plt.subplot(2, 1, 1)
+plt.plot(t[:200], signal_noisy[:200], color='red', label='Señal con Ruido')
+plt.title('Señal en el Dominio del Tiempo (Solo los primeros 0.2s)')
+plt.xlabel('Tiempo (s)')
+plt.ylabel('Amplitud')
+plt.legend()
+
+# Gráfico del dominio de la frecuencia (FFT)
+plt.subplot(2, 1, 2)
+plt.plot(freqs[L], psd[L].real, color='blue', label='Espectro de Frecuencia')
+plt.title('Señal en el Dominio de la Frecuencia (FFT)')
+plt.xlabel('Frecuencia (Hz)')
+plt.ylabel('Potencia')
+plt.xlim(0, 250) # Limitamos a 250Hz para ver los picos claramente
+plt.legend()
+
+plt.tight_layout()
+plt.show()
