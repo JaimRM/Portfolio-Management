@@ -1,3 +1,5 @@
+https://linktr.ee/jaime.ruiz
+
 Ideas for next-up tasks
 
 Project A:
