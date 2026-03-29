@@ -1,5 +1,3 @@
-I aim to create a tool that beats the financial markets consistently
-
 Ideas for next-up tasks
 
 Project A:
@@ -16,5 +14,5 @@ Project C:
 Momentum / mean-reversion strategy + TESTING
 MONTECARLO simulation for returns
 
-Final project:
-Machine learning model (LSTM, transformer, or feature-rich regression)
+Project D:
+More advanced machine learning model (LSTM, transformer, or feature-rich regression)
