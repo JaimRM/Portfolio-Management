@@ -13,18 +13,23 @@ Since the analysis won't just include current positions, but also watchlist comp
 
 STATUS: Done✅
 
-
 Project B:
+Fixed income price sensitivity simulator. Calculation of a bond's Fair Value and analysis of P&L impact when there is a yield curve shock. Oriented to risk management.
+Simulador de sensibilidad de Renta Fija. Este script calcula el Fair Value de un bono y analiza el impacto en el P&L ante shocks en la curva de tipos, fundamental para el control de riesgos en Tesorería.
+
+STATUS: Done✅
+
+Project C:
 ARIMA with differencing
 ARIMA + GARCH to predict risk/volatility
 
 
-Project C:
+Project D:
 Momentum / mean-reversion strategy + TESTING
 MONTECARLO simulation for returns
 
 
-Project D:
+Project E:
 More advanced machine learning model (LSTM, transformer, or feature-rich regression)
 
 STATUS: got the basics down, halfway through
