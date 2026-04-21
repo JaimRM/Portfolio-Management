@@ -1,6 +1,6 @@
 https://linktr.ee/jaime.ruiz
 
-👀 Goal: Automating asset valuation and risk management and control with Python and time series analysis
+👀 Goal: Automating asset valuation and risk control with Python and time series analysis.
 📫 jaimeruiz018@gmail.com
 
 Ideas for next-up tasks
