@@ -21,7 +21,7 @@ This demonstrates that a strategy with a positive expected return can still fail
 **Assuming a daily drag of 1 basis point (0.01%) to account for commissions, slippage, and bid-ask spreads.*
 
 
-We can add ES or expected shortfall (the average of everything below the VaR) as a more coherent measure, assuming 'final_returns' is your array of 1000 simulated outcomes.
+We can add expected shortfall (the average of everything below the VaR) as a more coherent measure, assuming 'final_returns' is your array of 1000 simulated outcomes.
 
 var_95 = np.percentile(final_returns, 5)
 
