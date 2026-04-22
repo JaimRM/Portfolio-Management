@@ -19,3 +19,13 @@ While the theoretical model (Normal Distribution) suggests a ~22% risk of loss, 
 This demonstrates that a strategy with a positive expected return can still fail due to the sequence of returns and market friction.
 
 **Assuming a daily drag of 1 basis point (0.01%) to account for commissions, slippage, and bid-ask spreads.*
+
+We can add ES (expected shortfall) as a more coherent measre:
+
+# Assuming 'final_returns' is your array of 1000 simulated outcomes
+var_95 = np.percentile(final_returns, 5)
+
+# Expected Shortfall: The average of everything BELOW the VaR
+expected_shortfall = final_returns[final_returns <= var_95].mean()
+
+print(f"If things go wrong (worst 5%), we expect to lose {abs(expected_shortfall):.2f} on average.")
