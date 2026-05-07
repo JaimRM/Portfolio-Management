@@ -1,0 +1,66 @@
+import numpy as np
+from scipy import stats
+
+time = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24])
+price = np.array([25.80, 27.10, 24.60, 20.00, 15.50, 18.20, 25.00, 30.20, 25.40, 32.30, 27.30, 30.90, 28.40, 29.90, 35.20, 38.70, 48.30, 39.40, 42.20, 49.70, 45.60, 51.10, 60.70, 55.20, 66.00])
+
+slope, intercept, r_value, p_value, std_err = stats.linregress(time, price)
+
+print(f"Slope: {slope:.4f}")
+print(f"Intercept: {intercept:.4f}")
+
+#################
+
+x = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24])
+y = np.array([25.80, 27.10, 24.60, 20.00, 15.50, 18.20, 25.00, 30.20, 25.40, 32.30, 27.30, 30.90, 28.40, 29.90, 35.20, 38.70, 48.30, 39.40, 42.20, 49.70, 45.60, 51.10, 60.70, 55.20, 66.00])
+
+sum_x = np.sum(x)
+sum_y = np.sum(y)
+sum_xx = np.sum(x**2)
+sum_xy = np.sum(x*y)
+n = len(x)
+
+print(f"{n=}")
+print(f"{sum_x=}")
+print(f"{sum_y=}")
+print(f"{sum_xx=}")
+print(f"{sum_xy=}")
+
+slope = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x**2)
+intercept = (sum_y - slope * sum_x) / n
+
+print(f"{slope=}")
+print(f"{intercept=}")
+
+#################
+
+import numpy as np
+from scipy import stats
+
+# 'Time' is the number of quarters after the first quarter of 1995
+time = np.array([
+    0, 1, 2, 3,    # 1995
+    4, 5, 6, 7,    # 1996
+    8, 9, 10, 11,  # 1997
+    12, 13, 14, 15,# 1998
+    16, 17, 18, 19,# 1999
+    20, 21, 22, 23,# 2000
+    24             # 2001
+])
+
+# 'Price' ($/barrel) extracted from the provided table
+price = np.array([
+    25.80, 27.10, 24.60, 20.00,
+    15.50, 18.20, 25.00, 30.20,
+    25.40, 32.30, 27.30, 30.90,
+    28.40, 29.90, 35.20, 38.70,
+    48.30, 39.40, 42.20, 49.70,
+    45.60, 51.10, 60.70, 55.20,
+    66.00
+])
+
+# Perform Linear Regression
+slope, intercept, r_value, p_value, std_err = stats.linregress(time, price)
+
+print(f"Intercept (b0): {intercept:.3f}")
+print(f"Slope (b1): {slope:.3f}")
