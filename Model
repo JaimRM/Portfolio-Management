@@ -1,0 +1,33 @@
+ARIMA
+
+import pandas as pd
+from statsmodels.tsa.arima.model import ARIMA
+
+# Assuming 'df' has a column 'Price'
+# (p, d, q): p=lags, d=differencing (to make it stationary), q=error lags
+model_arima = ARIMA(df['Price'], order=(1, 1, 1))
+results_arima = model_arima.fit()
+
+print(results_arima.summary())
+
+GARCH
+
+from arch import arch_model
+
+# GARCH is usually run on 'Returns' rather than raw price
+df['Returns'] = 100 * df['Price'].pct_change().dropna()
+
+# p=1, q=1 is the standard 'Simple GARCH'
+model_garch = arch_model(df['Returns'].dropna(), vol='Garch', p=1, q=1)
+results_garch = model_garch.fit(update_freq=5)
+
+print(results_garch.summary())
+
+ARX
+
+# Assuming 'df' has 'Price' and 'DXY' (Dollar Index)
+# we use 'exog' to pass the external variable
+model_arx = ARIMA(df['Price'], exog=df['DXY'], order=(1, 0, 0)) 
+results_arx = model_arx.fit()
+
+print(results_arx.summary())
