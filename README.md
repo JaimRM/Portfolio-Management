@@ -21,12 +21,18 @@ STATUS: Done✅
 
 Project C:
 ARIMA with differencing
+
 ARIMA + GARCH to predict risk/volatility
+
+STATUS: Done✅
 
 
 Project D:
 Momentum / mean-reversion strategy + TESTING
+
 MONTECARLO simulation for returns
+
+STATUS: Done✅
 
 
 Project E:
