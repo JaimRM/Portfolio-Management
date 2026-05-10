@@ -27,6 +27,7 @@ We can add expected shortfall (the average of everything below the VaR) as a mor
 
 
 var_95 = np.percentile(final_returns, 5)
-expected_shortfall = final_returns[final_returns <= var_95].mean()
-print(f"If things go wrong (worst 5%), we expect to lose {abs(expected_shortfall):.2f} on average.")
 
+expected_shortfall = final_returns[final_returns <= var_95].mean()
+
+print(f"If things go wrong (worst 5%), we expect to lose {abs(expected_shortfall):.2f} on average.")
