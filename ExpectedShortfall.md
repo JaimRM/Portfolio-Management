@@ -22,11 +22,11 @@ This demonstrates that a strategy with a positive expected return can still fail
 
 I calculated that a friction of just 1 bps daily, accounting for execution slippage and commissions, reduces the strategy's Sharpe Ratio by approximately 20%. This structural 'drag' shifts the distribution's mean, increasing the Probability of Ruin by nearly 5%. This highlights why Execution Quality must be monitored; a bad broker isn't just a cost, they are a risk factor that can turn a winning strategy into a losing one.
 
-We can add expected shortfall (the average of everything below the VaR) as a more coherent measure, assuming 'final_returns' is our array of 1000 simulated outcomes.
+We can add expected shortfall (the average of everything below the VaR) as a more coherent measure, assuming 'final_returns' is our array of 1000 simulated outcomes:
+
+
 
 var_95 = np.percentile(final_returns, 5)
-
 expected_shortfall = final_returns[final_returns <= var_95].mean()
-
 print(f"If things go wrong (worst 5%), we expect to lose {abs(expected_shortfall):.2f} on average.")
 
