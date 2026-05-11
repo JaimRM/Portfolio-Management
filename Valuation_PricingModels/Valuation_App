@@ -1,0 +1,534 @@
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox, scrolledtext
+import json
+import csv
+from datetime import datetime
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import numpy as np
+
+class FinancialValuationApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Financial Valuation Pro")
+        self.root.geometry("1400x900")
+
+        # Data storage
+        self.company_data = {
+            'name': '',
+            'ticker': '',
+            'revenue': [],
+            'ebitda': [],
+            'net_income': [],
+            'free_cash_flow': [],
+            'total_assets': [],
+            'total_liabilities': [],
+            'dividends': [],
+            'shares_outstanding': 0,
+            'market_cap': 0,
+            'debt': 0,
+            'cash': 0,
+            'notes': ''
+        }
+
+        self.valuation_params = {
+            'wacc': 0.10,
+            'terminal_growth': 0.025,
+            'forecast_years': 5,
+            'pe_multiple': 15,
+            'ev_ebitda_multiple': 10,
+            'ps_multiple': 2,
+            'dividend_growth': 0.03,
+            'required_return': 0.10,
+            'terminal_method': 'perpetuity'  # or 'exit_multiple'
+        }
+
+        self.create_menu()
+        self.create_notebook()
+
+    def create_menu(self):
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
+
+        file_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=file_menu)
+        file_menu.add_command(label="New Company", command=self.new_company)
+        file_menu.add_command(label="Load Company", command=self.load_company)
+        file_menu.add_command(label="Save Company", command=self.save_company)
+        file_menu.add_command(label="Import CSV", command=self.import_csv)
+        file_menu.add_separator()
+        file_menu.add_command(label="Export to PDF", command=self.export_pdf)
+        file_menu.add_command(label="Exit", command=self.root.quit)
+
+        data_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Data", menu=data_menu)
+        data_menu.add_command(label="Fetch from API", command=self.fetch_api_data)
+
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Help", menu=help_menu)
+        help_menu.add_command(label="About", command=self.show_about)
+
+    def create_notebook(self):
+        self.notebook = ttk.Notebook(self.root)
+        self.notebook.pack(fill='both', expand=True, padx=5, pady=5)
+
+        # Tab 1: Company Information
+        self.create_company_info_tab()
+
+        # Tab 2: Financial Data Input
+        self.create_financial_data_tab()
+
+        # Tab 3: Valuation Parameters
+        self.create_parameters_tab()
+
+        # Tab 4: DCF Valuation
+        self.create_dcf_tab()
+
+        # Tab 5: Multiples Valuation
+        self.create_multiples_tab()
+
+        # Tab 6: Gordon Growth Model
+        self.create_gordon_tab()
+
+        # Tab 7: Asset-Based Valuation
+        self.create_asset_based_tab()
+
+        # Tab 8: Comparison & Sensitivity
+        self.create_comparison_tab()
+
+        # Tab 9: Scenario Analysis
+        self.create_scenario_tab()
+
+    def create_company_info_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Company Info")
+
+        # Company details
+        ttk.Label(frame, text="Company Name:", font=('Arial', 12, 'bold')).grid(row=0, column=0, sticky='w', padx=20, pady=10)
+        self.company_name_entry = ttk.Entry(frame, width=40)
+        self.company_name_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        ttk.Label(frame, text="Ticker Symbol:", font=('Arial', 12, 'bold')).grid(row=1, column=0, sticky='w', padx=20, pady=10)
+        self.ticker_entry = ttk.Entry(frame, width=40)
+        self.ticker_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        ttk.Label(frame, text="Shares Outstanding:", font=('Arial', 12, 'bold')).grid(row=2, column=0, sticky='w', padx=20, pady=10)
+        self.shares_entry = ttk.Entry(frame, width=40)
+        self.shares_entry.grid(row=2, column=1, padx=10, pady=10)
+
+        ttk.Label(frame, text="Market Cap:", font=('Arial', 12, 'bold')).grid(row=3, column=0, sticky='w', padx=20, pady=10)
+        self.market_cap_entry = ttk.Entry(frame, width=40)
+        self.market_cap_entry.grid(row=3, column=1, padx=10, pady=10)
+
+        ttk.Label(frame, text="Total Debt:", font=('Arial', 12, 'bold')).grid(row=4, column=0, sticky='w', padx=20, pady=10)
+        self.debt_entry = ttk.Entry(frame, width=40)
+        self.debt_entry.grid(row=4, column=1, padx=10, pady=10)
+
+        ttk.Label(frame, text="Cash & Equivalents:", font=('Arial', 12, 'bold')).grid(row=5, column=0, sticky='w', padx=20, pady=10)
+        self.cash_entry = ttk.Entry(frame, width=40)
+        self.cash_entry.grid(row=5, column=1, padx=10, pady=10)
+
+        ttk.Label(frame, text="Notes & Qualitative Factors:", font=('Arial', 12, 'bold')).grid(row=6, column=0, sticky='nw', padx=20, pady=10)
+        self.notes_text = scrolledtext.ScrolledText(frame, width=50, height=15)
+        self.notes_text.grid(row=6, column=1, padx=10, pady=10)
+
+        ttk.Button(frame, text="Save Company Info", command=self.save_company_info).grid(row=7, column=1, pady=20)
+
+    def create_financial_data_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Financial Data")
+
+        # Create scrollable frame
+        canvas = tk.Canvas(frame)
+        scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Headers
+        headers = ["Year", "Revenue", "EBITDA", "Net Income", "Free Cash Flow", "Total Assets", "Total Liabilities", "Dividends"]
+        for col, header in enumerate(headers):
+            ttk.Label(scrollable_frame, text=header, font=('Arial', 10, 'bold')).grid(row=0, column=col, padx=5, pady=5)
+
+        # Create 10 rows for historical data
+        self.financial_entries = []
+        for row in range(1, 11):
+            row_entries = []
+            for col in range(8):
+                entry = ttk.Entry(scrollable_frame, width=15)
+                entry.grid(row=row, column=col, padx=5, pady=2)
+                row_entries.append(entry)
+            self.financial_entries.append(row_entries)
+
+        button_frame = ttk.Frame(scrollable_frame)
+        button_frame.grid(row=11, column=0, columnspan=8, pady=20)
+
+        ttk.Button(button_frame, text="Save Financial Data", command=self.save_financial_data).pack(side='left', padx=5)
+        ttk.Button(button_frame, text="Clear Data", command=self.clear_financial_data).pack(side='left', padx=5)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+    def create_parameters_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Parameters")
+
+        ttk.Label(frame, text="Valuation Parameters", font=('Arial', 14, 'bold')).grid(row=0, column=0, columnspan=2, pady=20)
+
+        params = [
+            ("WACC (%):", 'wacc', 10.0),
+            ("Terminal Growth Rate (%):", 'terminal_growth', 2.5),
+            ("Forecast Years:", 'forecast_years', 5),
+            ("P/E Multiple:", 'pe_multiple', 15.0),
+            ("EV/EBITDA Multiple:", 'ev_ebitda_multiple', 10.0),
+            ("P/S Multiple:", 'ps_multiple', 2.0),
+            ("Dividend Growth Rate (%):", 'dividend_growth', 3.0),
+            ("Required Return (%):", 'required_return', 10.0)
+        ]
+
+        self.param_entries = {}
+        for i, (label, key, default) in enumerate(params, start=1):
+            ttk.Label(frame, text=label, font=('Arial', 11)).grid(row=i, column=0, sticky='w', padx=20, pady=8)
+            entry = ttk.Entry(frame, width=20)
+            entry.insert(0, str(default))
+            entry.grid(row=i, column=1, padx=10, pady=8)
+            self.param_entries[key] = entry
+
+        ttk.Label(frame, text="Terminal Value Method:", font=('Arial', 11)).grid(row=len(params)+1, column=0, sticky='w', padx=20, pady=8)
+        self.terminal_method_var = tk.StringVar(value='perpetuity')
+        ttk.Radiobutton(frame, text="Perpetuity Growth", variable=self.terminal_method_var, value='perpetuity').grid(row=len(params)+1, column=1, sticky='w', padx=10)
+        ttk.Radiobutton(frame, text="Exit Multiple", variable=self.terminal_method_var, value='exit_multiple').grid(row=len(params)+2, column=1, sticky='w', padx=10)
+
+        ttk.Button(frame, text="Update Parameters", command=self.update_parameters).grid(row=len(params)+3, column=1, pady=20)
+
+    def create_dcf_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="DCF Valuation")
+
+        # Left side - calculations
+        left_frame = ttk.Frame(frame)
+        left_frame.pack(side='left', fill='both', expand=True, padx=10, pady=10)
+
+        ttk.Label(left_frame, text="Discounted Cash Flow Valuation", font=('Arial', 14, 'bold')).pack(pady=10)
+
+        ttk.Button(left_frame, text="Calculate DCF", command=self.calculate_dcf).pack(pady=10)
+
+        self.dcf_result_text = scrolledtext.ScrolledText(left_frame, width=60, height=25)
+        self.dcf_result_text.pack(pady=10, fill='both', expand=True)
+
+        # Right side - chart
+        right_frame = ttk.Frame(frame)
+        right_frame.pack(side='right', fill='both', expand=True, padx=10, pady=10)
+
+        self.dcf_figure = Figure(figsize=(6, 5))
+        self.dcf_canvas = FigureCanvasTkAgg(self.dcf_figure, right_frame)
+        self.dcf_canvas.get_tk_widget().pack(fill='both', expand=True)
+
+    def create_multiples_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Multiples Valuation")
+
+        ttk.Label(frame, text="Comparable Company Analysis", font=('Arial', 14, 'bold')).pack(pady=10)
+
+        ttk.Button(frame, text="Calculate Multiples Valuation", command=self.calculate_multiples).pack(pady=10)
+
+        self.multiples_result_text = scrolledtext.ScrolledText(frame, width=80, height=30)
+        self.multiples_result_text.pack(pady=10, padx=20, fill='both', expand=True)
+
+    def create_gordon_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Gordon Growth Model")
+
+        ttk.Label(frame, text="Gordon Growth Model (Dividend Discount Model)", font=('Arial', 14, 'bold')).pack(pady=10)
+
+        ttk.Button(frame, text="Calculate Gordon Growth Valuation", command=self.calculate_gordon).pack(pady=10)
+
+        self.gordon_result_text = scrolledtext.ScrolledText(frame, width=80, height=30)
+        self.gordon_result_text.pack(pady=10, padx=20, fill='both', expand=True)
+
+    def create_asset_based_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Asset-Based Valuation")
+
+        ttk.Label(frame, text="Asset-Based Valuation (Book Value Method)", font=('Arial', 14, 'bold')).pack(pady=10)
+
+        ttk.Button(frame, text="Calculate Asset-Based Valuation", command=self.calculate_asset_based).pack(pady=10)
+
+        self.asset_result_text = scrolledtext.ScrolledText(frame, width=80, height=30)
+        self.asset_result_text.pack(pady=10, padx=20, fill='both', expand=True)
+
+    def create_comparison_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Comparison & Sensitivity")
+
+        # Top section - comparison
+        comp_frame = ttk.LabelFrame(frame, text="Side-by-Side Comparison")
+        comp_frame.pack(fill='both', expand=True, padx=10, pady=10)
+
+        ttk.Button(comp_frame, text="Compare All Methods", command=self.compare_all_methods).pack(pady=10)
+
+        self.comparison_text = scrolledtext.ScrolledText(comp_frame, width=100, height=15)
+        self.comparison_text.pack(pady=10, padx=10, fill='both', expand=True)
+
+        # Bottom section - sensitivity analysis
+        sens_frame = ttk.LabelFrame(frame, text="Sensitivity Analysis")
+        sens_frame.pack(fill='both', expand=True, padx=10, pady=10)
+
+        ttk.Label(sens_frame, text="Select Parameter:").pack(pady=5)
+        self.sensitivity_param = ttk.Combobox(sens_frame, values=['WACC', 'Terminal Growth', 'Revenue Growth'])
+        self.sensitivity_param.pack(pady=5)
+        self.sensitivity_param.set('WACC')
+
+        ttk.Button(sens_frame, text="Run Sensitivity Analysis", command=self.run_sensitivity_analysis).pack(pady=10)
+
+        self.sensitivity_figure = Figure(figsize=(10, 4))
+        self.sensitivity_canvas = FigureCanvasTkAgg(self.sensitivity_figure, sens_frame)
+        self.sensitivity_canvas.get_tk_widget().pack(fill='both', expand=True)
+
+    def create_scenario_tab(self):
+        frame = ttk.Frame(self.notebook)
+        self.notebook.add(frame, text="Scenario Analysis")
+
+        ttk.Label(frame, text="Scenario Analysis (Best/Base/Worst Case)", font=('Arial', 14, 'bold')).pack(pady=10)
+
+        # Scenario inputs
+        input_frame = ttk.Frame(frame)
+        input_frame.pack(pady=10)
+
+        scenarios = ['Base Case', 'Best Case', 'Worst Case']
+        self.scenario_entries = {}
+
+        ttk.Label(input_frame, text="Revenue Growth (%):").grid(row=0, column=0, padx=10, pady=5)
+        for i, scenario in enumerate(scenarios, 1):
+            ttk.Label(input_frame, text=scenario).grid(row=0, column=i, padx=10, pady=5)
+            entry = ttk.Entry(input_frame, width=10)
+            entry.grid(row=1, column=i, padx=10, pady=5)
+            entry.insert(0, str(5 if scenario == 'Base Case' else (10 if scenario == 'Best Case' else 2)))
+            self.scenario_entries[scenario] = entry
+
+        ttk.Button(frame, text="Calculate Scenarios", command=self.calculate_scenarios).pack(pady=10)
+
+        self.scenario_result_text = scrolledtext.ScrolledText(frame, width=100, height=20)
+        self.scenario_result_text.pack(pady=10, padx=20, fill='both', expand=True)
+
+        # Chart for scenarios
+        self.scenario_figure = Figure(figsize=(10, 4))
+        self.scenario_canvas = FigureCanvasTkAgg(self.scenario_figure, frame)
+        self.scenario_canvas.get_tk_widget().pack(fill='both', expand=True)
+
+    # Calculation Methods
+    def calculate_dcf(self):
+        try:
+            self.update_parameters()
+            fcf_list = [float(entry[3].get()) for entry in self.financial_entries if entry[3].get()]
+
+            if len(fcf_list) < 2:
+                messagebox.showerror("Error", "Need at least 2 years of Free Cash Flow data")
+                return
+
+            # Calculate historical growth rate
+            growth_rates = [(fcf_list[i]/fcf_list[i-1] - 1) for i in range(1, len(fcf_list)) if fcf_list[i-1] != 0]
+            avg_growth = np.mean(growth_rates) if growth_rates else 0.05
+
+            # Project future cash flows
+            last_fcf = fcf_list[-1]
+            forecast_years = int(self.valuation_params['forecast_years'])
+            wacc = self.valuation_params['wacc']
+            terminal_growth = self.valuation_params['terminal_growth']
+
+            projected_fcf = []
+            pv_fcf = []
+
+            for year in range(1, forecast_years + 1):
+                fcf = last_fcf * ((1 + avg_growth) ** year)
+                pv = fcf / ((1 + wacc) ** year)
+                projected_fcf.append(fcf)
+                pv_fcf.append(pv)
+
+            # Calculate terminal value
+            if self.terminal_method_var.get() == 'perpetuity':
+                terminal_fcf = projected_fcf[-1] * (1 + terminal_growth)
+                terminal_value = terminal_fcf / (wacc - terminal_growth)
+            else:
+                ev_ebitda = self.valuation_params['ev_ebitda_multiple']
+                ebitda_list = [float(entry[1].get()) for entry in self.financial_entries if entry[1].get()]
+                if ebitda_list:
+                    last_ebitda = ebitda_list[-1]
+                    terminal_value = last_ebitda * ev_ebitda
+                else:
+                    terminal_value = projected_fcf[-1] * 10  # fallback
+
+            pv_terminal = terminal_value / ((1 + wacc) ** forecast_years)
+
+            enterprise_value = sum(pv_fcf) + pv_terminal
+            equity_value = enterprise_value - self.company_data['debt'] + self.company_data['cash']
+            shares = self.company_data['shares_outstanding']
+            value_per_share = equity_value / shares if shares > 0 else 0
+
+            # Display results
+            result = f"DCF VALUATION RESULTS\n"
+            result += f"{'='*60}\n\n"
+            result += f"Company: {self.company_data['name']}\n"
+            result += f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+            result += f"ASSUMPTIONS:\n"
+            result += f"  WACC: {wacc*100:.2f}%\n"
+            result += f"  Terminal Growth: {terminal_growth*100:.2f}%\n"
+            result += f"  Forecast Period: {forecast_years} years\n"
+            result += f"  Historical Avg Growth: {avg_growth*100:.2f}%\n\n"
+
+            result += f"PROJECTED FREE CASH FLOWS:\n"
+            for i, (fcf, pv) in enumerate(zip(projected_fcf, pv_fcf), 1):
+                result += f"  Year {i}: ${fcf/1e6:.2f}M (PV: ${pv/1e6:.2f}M)\n"
+
+            result += f"\nTERMINAL VALUE:\n"
+            result += f"  Terminal Value: ${terminal_value/1e6:.2f}M\n"
+            result += f"  PV of Terminal Value: ${pv_terminal/1e6:.2f}M\n\n"
+
+            result += f"VALUATION:\n"
+            result += f"  Enterprise Value: ${enterprise_value/1e6:.2f}M\n"
+            result += f"  Less: Debt: ${self.company_data['debt']/1e6:.2f}M\n"
+            result += f"  Add: Cash: ${self.company_data['cash']/1e6:.2f}M\n"
+            result += f"  Equity Value: ${equity_value/1e6:.2f}M\n"
+            result += f"  Shares Outstanding: {shares/1e6:.2f}M\n"
+            result += f"  VALUE PER SHARE: ${value_per_share:.2f}\n"
+
+            self.dcf_result_text.delete('1.0', tk.END)
+            self.dcf_result_text.insert('1.0', result)
+
+            # Create chart
+            self.dcf_figure.clear()
+            ax = self.dcf_figure.add_subplot(111)
+            years = [f"Year {i}" for i in range(1, forecast_years + 1)] + ['Terminal']
+            values = projected_fcf + [terminal_value]
+            ax.bar(years, [v/1e6 for v in values], color='steelblue')
+            ax.set_ylabel('Value ($M)')
+            ax.set_title('Projected Cash Flows & Terminal Value')
+            ax.tick_params(axis='x', rotation=45)
+            self.dcf_figure.tight_layout()
+            self.dcf_canvas.draw()
+
+        except Exception as e:
+            messagebox.showerror("Error", f"DCF calculation failed: {str(e)}")
+
+    def calculate_multiples(self):
+        try:
+            result = f"MULTIPLES VALUATION RESULTS\n"
+            result += f"{'='*60}\n\n"
+            result += f"Company: {self.company_data['name']}\n\n"
+
+            # Get latest financial data
+            revenue_list = [float(entry[0].get()) for entry in self.financial_entries if entry[0].get()]
+            ebitda_list = [float(entry[1].get()) for entry in self.financial_entries if entry[1].get()]
+            net_income_list = [float(entry[2].get()) for entry in self.financial_entries if entry[2].get()]
+
+            if not revenue_list:
+                messagebox.showerror("Error", "No revenue data available")
+                return
+
+            latest_revenue = revenue_list[-1]
+            latest_ebitda = ebitda_list[-1] if ebitda_list else 0
+            latest_net_income = net_income_list[-1] if net_income_list else 0
+
+            shares = self.company_data['shares_outstanding']
+            debt = self.company_data['debt']
+            cash = self.company_data['cash']
+
+            # P/E Multiple
+            pe_multiple = self.valuation_params['pe_multiple']
+            pe_equity_value = latest_net_income * pe_multiple
+            pe_value_per_share = pe_equity_value / shares if shares > 0 else 0
+
+            result += f"P/E MULTIPLE VALUATION:\n"
+            result += f"  Latest Net Income: ${latest_net_income/1e6:.2f}M\n"
+            result += f"  P/E Multiple: {pe_multiple:.1f}x\n"
+            result += f"  Equity Value: ${pe_equity_value/1e6:.2f}M\n"
+            result += f"  Value per Share: ${pe_value_per_share:.2f}\n\n"
+
+            # EV/EBITDA Multiple
+            ev_ebitda_multiple = self.valuation_params['ev_ebitda_multiple']
+            enterprise_value = latest_ebitda * ev_ebitda_multiple
+            ev_ebitda_equity_value = enterprise_value - debt + cash
+            ev_ebitda_value_per_share = ev_ebitda_equity_value / shares if shares > 0 else 0
+
+            result += f"EV/EBITDA MULTIPLE VALUATION:\n"
+            result += f"  Latest EBITDA: ${latest_ebitda/1e6:.2f}M\n"
+            result += f"  EV/EBITDA Multiple: {ev_ebitda_multiple:.1f}x\n"
+            result += f"  Enterprise Value: ${enterprise_value/1e6:.2f}M\n"
+            result += f"  Equity Value: ${ev_ebitda_equity_value/1e6:.2f}M\n"
+            result += f"  Value per Share: ${ev_ebitda_value_per_share:.2f}\n\n"
+
+            # P/S Multiple
+            ps_multiple = self.valuation_params['ps_multiple']
+            ps_equity_value = latest_revenue * ps_multiple
+            ps_value_per_share = ps_equity_value / shares if shares > 0 else 0
+
+            result += f"P/S MULTIPLE VALUATION:\n"
+            result += f"  Latest Revenue: ${latest_revenue/1e6:.2f}M\n"
+            result += f"  P/S Multiple: {ps_multiple:.1f}x\n"
+            result += f"  Equity Value: ${ps_equity_value/1e6:.2f}M\n"
+            result += f"  Value per Share: ${ps_value_per_share:.2f}\n\n"
+
+            # Average
+            avg_value = np.mean([pe_value_per_share, ev_ebitda_value_per_share, ps_value_per_share])
+            result += f"AVERAGE VALUE PER SHARE: ${avg_value:.2f}\n"
+
+            self.multiples_result_text.delete('1.0', tk.END)
+            self.multiples_result_text.insert('1.0', result)
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Multiples calculation failed: {str(e)}")
+
+    def calculate_gordon(self):
+        try:
+            result = f"GORDON GROWTH MODEL RESULTS\n"
+            result += f"{'='*60}\n\n"
+            result += f"Company: {self.company_data['name']}\n\n"
+
+            dividend_list = [float(entry[6].get()) for entry in self.financial_entries if entry[6].get()]
+
+            if not dividend_list:
+                result += "No dividend data available. Gordon Growth Model requires dividend payments.\n"
+                self.gordon_result_text.delete('1.0', tk.END)
+                self.gordon_result_text.insert('1.0', result)
+                return
+
+            latest_dividend = dividend_list[-1]
+            shares = self.company_data['shares_outstanding']
+            dividend_per_share = latest_dividend / shares if shares > 0 else 0
+
+            g = self.valuation_params['dividend_growth']
+            r = self.valuation_params['required_return']
+
+            if r <= g:
+                result += "Error: Required return must be greater than dividend growth rate.\n"
+                self.gordon_result_text.delete('1.0', tk.END)
+                self.gordon_result_text.insert('1.0', result)
+                return
+
+            # Gordon Growth Model: P = D1 / (r - g)
+            next_dividend = dividend_per_share * (1 + g)
+            value_per_share = next_dividend / (r - g)
+
+            result += f"ASSUMPTIONS:\n"
+            result += f"  Current Dividend per Share: ${dividend_per_share:.2f}\n"
+            result += f"  Dividend Growth Rate: {g*100:.2f}%\n"
+            result += f"  Required Return: {r*100:.2f}%\n\n"
+
+            result += f"CALCULATION:\n"
+            result += f"  Next Year Dividend (D1): ${next_dividend:.2f}\n"
+            result += f"  VALUE PER SHARE: ${value_per_share:.2f}\n\n"
+
+            result += f"Total Equity Value: ${value_per_share * shares / 1e6:.2f}M\n"
+
+            self.gordon_result_text.delete('1.0', tk.END)
+            self.gordon_result_text.insert('1.0', result)
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Gordon Growth calculation failed: {str(e)}")
