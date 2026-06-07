@@ -1,8 +1,8 @@
 Para reclutadores en proceso de selección: / For recruiters in their hiring process:
 https://github.com/JaimRM/QuantitativeFinance/blob/main/Recruiter_Blueprint.md
 
-https://linktr.ee/jaime.ruiz
 
+https://linktr.ee/jaime.ruiz
 📫 jaimeruiz018@gmail.com
 
 
