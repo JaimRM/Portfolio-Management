@@ -1,3 +1,5 @@
+#Context: DataCamp. Practice using pandas to analyze financial data and plot the Dow Jones Index against bond prices.
+
 import pandas as pd
 # Use melt on ten_yr, unpivot everything besides the metric column
 print(ten_yr.head())
