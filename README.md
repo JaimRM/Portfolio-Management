@@ -4,7 +4,7 @@
 
 **https://github.com/JaimRM/QuantitativeFinance/blob/main/Recruiter_Blueprint.md**
 
--
+
 
 **https://linktr.ee/jaime.ruiz
 📫 jaimeruiz018@gmail.com**
