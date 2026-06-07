@@ -1,6 +1,6 @@
-ES**Para facilitar el trabajo de la(s) persona(s) encargada(s) del proceso de selección:**
+ES **Para facilitar el trabajo de la(s) persona(s) encargada(s) del proceso de selección:**
 
-ENG**For the sake of information transparency towards recruiters:**
+ENG **For the sake of information transparency towards recruiters:**
 
 **https://github.com/JaimRM/QuantitativeFinance/blob/main/Recruiter_Blueprint.md**
 
