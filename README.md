@@ -7,7 +7,6 @@
 -
 
 **https://linktr.ee/jaime.ruiz
-
 📫 jaimeruiz018@gmail.com**
 
 
