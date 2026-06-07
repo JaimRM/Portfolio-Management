@@ -6,9 +6,10 @@
 
 
 
-**https://linktr.ee/jaime.ruiz
+**https://linktr.ee/jaime.ruiz**
+
 Contacto/Contact info:
-📫 jaimeruiz018@gmail.com**
+**📫 jaimeruiz018@gmail.com**
 
 
 Ideas for next-up tasks
