@@ -3,12 +3,12 @@
 **For the sake of information transparency towards recruiters:**
 
 **https://github.com/JaimRM/QuantitativeFinance/blob/main/Recruiter_Blueprint.md**
+
 -
 
+**https://linktr.ee/jaime.ruiz
 
-https://linktr.ee/jaime.ruiz
-
-📫 jaimeruiz018@gmail.com
+📫 jaimeruiz018@gmail.com**
 
 
 Ideas for next-up tasks
