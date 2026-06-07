@@ -3,7 +3,7 @@
 **For the sake of information transparency towards recruiters:**
 
 **https://github.com/JaimRM/QuantitativeFinance/blob/main/Recruiter_Blueprint.md**
-
+-
 
 
 https://linktr.ee/jaime.ruiz
