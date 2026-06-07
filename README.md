@@ -7,6 +7,7 @@
 
 
 **https://linktr.ee/jaime.ruiz
+Contacto/Contact info:
 📫 jaimeruiz018@gmail.com**
 
 
