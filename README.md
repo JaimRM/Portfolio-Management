@@ -1,4 +1,5 @@
 Para facilitar el trabajo de la(s) persona(s) encargada(s) del proceso de selección:
+-
 For the sake of information transparency towards recruiters:
 https://github.com/JaimRM/QuantitativeFinance/blob/main/Recruiter_Blueprint.md
 -
