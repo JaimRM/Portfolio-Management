@@ -1,0 +1,31 @@
+import pandas as pd
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.arima.model import ARIMA
+
+# 1. Load daily price data
+# df = pd.read_csv('price_data.csv', parse_dates=['Date'], index_index='Date')
+# prices = df['Close']
+
+# 2. Returns or log-returns for daily price data to ensure stationarity
+returns = prices.pct_change().dropna()
+
+# Method A: Check optimal lag for stationarity testing (ADF Test)
+# autolag='AIC' automatically finds and uses the best lag
+adf_result = adfuller(returns, autolag='AIC')
+print(f"Optimal lag selected by AIC (ADF Test): {adf_result[2]}")
+
+# Method B: Search for the best ARIMA lag configuration using AIC loop
+best_aic = float("inf")
+best_lag = 0
+
+# Scan lags from 1 to 21 (roughly one month of daily data)
+for lag in range(1, 22):
+    try:
+        model = ARIMA(returns, order=(lag, 0, 0)).fit()
+        if model.aic < best_aic:
+            best_aic = model.aic
+            best_lag = lag
+    except:
+        continue
+
+print(f"Best autoregressive lag for ARIMA based on lowest AIC: {best_lag}")
