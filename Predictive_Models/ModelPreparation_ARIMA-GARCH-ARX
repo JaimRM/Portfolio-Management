@@ -26,7 +26,7 @@ print(results_garch.summary())
 ARX
 
 # Assuming 'df' has 'Price' and 'DXY' (Dollar Index)
-# we use 'exog' to pass the external variable
+# We use 'exog' to pass the external variable
 model_arx = ARIMA(df['Price'], exog=df['DXY'], order=(1, 0, 0)) 
 results_arx = model_arx.fit()
 
