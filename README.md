@@ -48,3 +48,11 @@ Project E:
 More advanced machine learning model (LSTM, transformer, or feature-rich regression)
 
 STATUS: got the basics down, halfway through
+
+
+ULTIMATE PROJECT:
+Perpetual **Proprietary** Valuation Screener
+
+Para temas de licencia, consultar conmigo (contacto arriba).
+
+For licensing requests, please contact me.
