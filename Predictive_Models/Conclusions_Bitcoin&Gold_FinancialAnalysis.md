@@ -12,7 +12,7 @@ Test ADF (Augmented Dickey-Fuller): Ambos p-valores son 0.0000. Rechazamos la hi
 
 
 
-3. Modelos Univariantes: ARIMA vs. GARCH
+2. Modelos Univariantes: ARIMA vs. GARCH
    
 
 ARIMA(1,0,1) en BTC
@@ -33,7 +33,7 @@ El modelo estima una volatilidad diaria actual del 3.27%, que, anualizada, equiv
 
 
 
-5. Modelos Multivariantes y Causalidad: ARX y VAR
+3. Modelos Multivariantes y Causalidad: ARX y VAR
    
 
 ARX (ARIMA con variable exógena)
@@ -56,7 +56,7 @@ Test de Causalidad de Granger: El p-valor es 0.883. Fallas en rechazar H0.
 Conclusión: El oro NO causa económicamente a BTC en el sentido de Granger. Los movimientos pasados del oro no sirven para predecir los movimientos futuros de BTC.
 
 
-7. El Sistema de Trading y Backtesting
+4. El Sistema de Trading y Backtesting
 El bloque final es la lógica cuantitativa que junta todo para operar:
 =============================================
   SEÑAL HOY        : LONG
