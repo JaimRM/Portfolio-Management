@@ -57,7 +57,8 @@ Conclusión: El oro NO causa económicamente a BTC en el sentido de Granger. Los
 
 
 4. El Sistema de Trading y Backtesting
-El bloque final es la lógica cuantitativa que junta todo para operar:
+
+   El bloque final es la lógica cuantitativa que junta todo para operar:
 =============================================
   SEÑAL HOY        : LONG
   ARIMA forecast   : +0.00218
