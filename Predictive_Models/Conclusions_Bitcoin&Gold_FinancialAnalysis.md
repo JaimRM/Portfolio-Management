@@ -63,8 +63,11 @@ El bloque final es la lógica cuantitativa que junta todo para operar:
 =============================================
    
   SEÑAL HOY        : LONG
+  
   ARIMA forecast   : +0.00218
+  
   VAR   forecast   : +0.00173
+  
   GARCH vol diaria : 0.0327  (umbral 0.04)
   
 =============================================
