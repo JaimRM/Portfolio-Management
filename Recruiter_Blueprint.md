@@ -18,6 +18,8 @@ https://github.com/JaimRM/QuantitativeFinance/blob/main/Predictive_Models/ARIMA-
 https://github.com/JaimRM/QuantitativeFinance/blob/main/Predictive_Models/basic_multi-factor_model
 https://github.com/JaimRM/QuantitativeFinance/blob/main/Valuation_PricingModels/Valuation_App
 https://github.com/JaimRM/QuantitativeFinance/blob/main/Valuation_PricingModels/fixed_income_analysis.py
+https://github.com/JaimRM/QuantitativeFinance/blob/main/Predictive_Models/gold_TIPSrealyields_correlations_maxDD_Sharpe_strategybacktests.ipynb
+https://github.com/JaimRM/QuantitativeFinance/blob/main/Predictive_Models/BTC_Gold.ipynb
 
 QUANTITATIVE TRADING, DATABASE HANDLING AND INFRASTRUCTURE SUPPORT SCRIPTS / TRADING CUANTITATIVO, BASES DE DATOS Y SOPORTE DE INFRAESTRUCTURA
 
