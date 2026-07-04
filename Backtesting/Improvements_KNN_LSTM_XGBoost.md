@@ -8,5 +8,7 @@ Permitir posiciones cortas: En lugar de ir a 0% en las señales bajistas, la est
 
 Si el modelo es capaz de ganar dinero en las caídas, entonces sí puede superar al simple Buy & Hold.
 
+P.D.: Añadiendo la posibilidad de short selling, observamos que la rentabilidad del modelo es aún menor que sin ella (long-only), y que la diferencia (lag) con el S&P 500 se agranda.
+
 
 Operar en temporalidades menores: El ruido diario es brutal, pero en gráficos de 5 o 15 minutos existen ineficiencias de microestructura que los algoritmos de Machine Learning pueden explotar con mucha más facilidad.
