@@ -12,7 +12,13 @@ Blends **six independent valuation methods** into a **single target price**,
 - **ARIMA + GARCH** — ARIMA(1,0,1) forecasts the conditional mean of daily log returns over the horizon; GARCH(1,1) forecasts the conditional variance combined into a point estimate + ~80% confidence band
 
 
-ARX and VAR were deliberately left out. The prior BTC/Gold walk-forward backtest found neither added meaningful accuracy over plain ARIMA/GARCH. VAR, in particular, is built for capturing co-dependency between multiple series, and doesn't map cleanly onto a single-stock target price. If you later want to test ARX with a specific exogenous regressor (e.g. sector ETF, rates), it is in the "Predictive_Models" folder.
+ARX and VAR were deliberately left out. The prior BTC/Gold walk-forward backtest found neither added meaningful accuracy over plain ARIMA/GARCH.
+
+VAR, in particular, is built for capturing co-dependency between multiple series, and doesn't map cleanly onto a single-stock target price.
+
+If you later want to test ARX with a specific exogenous regressor (e.g., sector ETF, rates), it can be found in the "Predictive_Models" folder.
+
+I also added a "clear cache" button in the sidebar for when you want to force a fresh pull mid-session (e.g., testing a price move intraday).
 
 
 ## Structure
