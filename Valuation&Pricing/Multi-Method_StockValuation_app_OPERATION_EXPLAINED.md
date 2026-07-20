@@ -30,7 +30,8 @@ streamlit run app.py
 ```
 
 NEXT:
-Type a ticker, hit "Run valuation," and you get sliders per method, a bar chart comparing each method's implied price against your blended target and the current market price, plus the Monte Carlo confidence band.
+
+Type a ticker, hit "Run valuation," and you get sliders per method, a bar chart comparing each method's implied price against your blended target and the current market price, plus the Monte Carlo and GARCH confidence bands.
 
 
 # A few design choices worth flagging:
