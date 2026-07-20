@@ -34,7 +34,7 @@ NEXT:
 Type a ticker, hit "Run valuation," and you get sliders per method, a bar chart comparing each method's implied price against your blended target and the current market price, plus the Monte Carlo and GARCH confidence bands.
 
 
-# A few design choices worth flagging:
+## A few design choices worth flagging:
 
 If a method is inapplicable (e.g. Gordon Growth on a non-dividend payer), it's automatically excluded, and weights are re-normalized across the rest — so you never accidentally zero out your target price.
 
