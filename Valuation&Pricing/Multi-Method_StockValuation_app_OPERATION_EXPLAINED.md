@@ -1,6 +1,6 @@
 # Weighted stock valuation app
 
-Blends **five independent valuation methods** into a **single target price**,
+Blends **six independent valuation methods** into a **single target price**,
 **weighted however you want**.
 
 ## Methods included
@@ -9,11 +9,16 @@ Blends **five independent valuation methods** into a **single target price**,
 - **Gordon Growth** — dividend discount model (only runs for dividend payers)
 - **Asset-Based** — book value per share (floor valuation)
 - **Monte Carlo** — Geometric Brownian Motion (GBM) simulation of the price distribution N days out, with median as point estimate
+- **ARIMA + GARCH** — ARIMA(1,0,1) forecasts the conditional mean of daily log returns over the horizon; GARCH(1,1) forecasts the conditional variance combined into a point estimate + ~80% confidence band
+
+
+ARX and VAR were deliberately left out. The prior BTC/Gold walk-forward backtest found neither added meaningful accuracy over plain ARIMA/GARCH. VAR, in particular, is built for capturing co-dependency between multiple series, and doesn't map cleanly onto a single-stock target price. If you later want to test ARX with a specific exogenous regressor (e.g. sector ETF, rates), it is in the "Predictive_Models" folder.
+
 
 ## Structure
 ```
 data_fetcher.py       # pulls raw inputs from yfinance into one dictionary
-valuation_methods.py  # 5 independent methods, MethodResult interface
+valuation_methods.py  # 6 independent methods, MethodResult interface
 blending_engine.py    # normalizes weights across applicable methods, computes blended price
 app.py                # Streamlit UI: ticker input, weight sliders, chart, output
 ```
