@@ -50,9 +50,11 @@ More advanced machine learning model (LSTM, transformer, or feature-rich regress
 STATUS: got the basics down, halfway through
 
 
-ULTIMATE PROJECT:
+LATEST PROJECTS:
+
 Perpetual **Proprietary** Valuation Screener
 
-Para temas de licencia, consultar conmigo (contacto arriba).
+Automated Multi-method Valuator
 
-For licensing requests, please contact me.
+
+For licensing requests, please contact me. I am open to suggestions and collaborations. Thank you for your interest.
