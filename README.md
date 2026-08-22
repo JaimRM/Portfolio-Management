@@ -29,7 +29,7 @@ A derivatives pricing suite featuring cross-method valuation and dynamic risk re
 ## 💻 Tech Stack & Tooling
 * **Languages:** C++20 (STL, High-Performance Structs), Python (3.14+), VBA (Excel)
 * **Libraries:** NumPy, Pandas, SciPy, Scikit-Learn, Statsmodels, Streamlit
-* **Data Pipelines:** SQL (Data Queries/Aggregation), Bloomberg BQL Integration, Financial Modeling Prep, YahooFinance
+* **Data Pipelines:** SQL (Data Queries/Aggregation), Bloomberg BQL Integration
 
 
 **(https://www.linkedin.com/in/jaime-ruiz-marín-09a05127b/)**
