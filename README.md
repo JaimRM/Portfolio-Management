@@ -1,60 +1,38 @@
-ES **Para facilitar el trabajo de la(s) persona(s) encargada(s) del proceso de selección:**
+A collection of production-grade quantitative trading strategies, financial engineering models, and market microstructure simulators.
 
-ENG **For the sake of information transparency towards recruiters:**
 
-**https://github.com/JaimRM/QuantitativeFinance/blob/main/Recruiter_Blueprint.md**
+Some of my core projects:
 
+### 1. [Transaction Cost Analysis (TCA) & Execution Simulator](./TCA_Simulator) (C++20)
+An institutional-grade intraday simulator to model market microstructure and optimize algorithmic execution slices.
+* **Microstructure Model:** Geometric Brownian Motion (GBM) price paths coupled with a **U-shaped intraday volume profile** and an Almgren-Chriss square-root market impact model (temporary vs. permanent impact decay).
+* **Algorithms Implemented:** Naive TWAP, Volume-Tracking VWAP, and **Implementation Shortfall (Almgren-Chriss closed-form optimal trajectory)** trading off timing risk ($\lambda$) against slippage.
+* **Metrics:** Implementation Shortfall (Perold 1988) vs. arrival price, VWAP slippage in bps, and peak participation-rate tracking.
+
+### 2. [Regime-Based Momentum Strategy — FX Majors](./FX_HMM_Momentum) (Python)
+A systematic FX trading strategy gated by a **3-State Gaussian Hidden Markov Model (HMM)** to decouple structural trends from volatility states.
+* **Mathematical Framework:** Baum-Welch (EM) parameter estimation and Forward Algorithm filtering (zero look-ahead bias). Walk-forward expanding windows refitted every 63 trading days.
+* **Risk Management:** Dynamic, regime-conditional stop-losses scaled by daily realized volatility. Regime transitions instantly trigger position-sizing adjustments (Trend High Vol vs. Trend Low Vol vs. Mean-Reverting Range).
+
+### 3. [Statistical Arbitrage & Pairs Trading Engine](./Statistical_Arbitrage) (Python)
+An end-to-end framework applying cointegration and time-series econometrics to equity pairs.
+* **Methodology:** Two-step Engle-Granger cointegration procedure, Augmented Dickey-Fuller (ADF) testing, and **Ornstein-Uhlenbeck (OU) stochastic process** parameter fitting for precise mean-reversion speed modeling.
+* **Statistical Rigor:** Implements **Bonferroni corrections** to control family-wise error rates during multi-pair mining, backed by out-of-sample walk-forward testing.
+
+### 4. [Delta-Hedging Options Pricer & Simulator](./Options_Pricer) (Python & Streamlit)
+A derivatives pricing suite featuring cross-method valuation and dynamic risk replication tracking.
+* **Pricing Engines:** Analytical Black-Scholes-Merton, Binomial Trees for American options, and Monte Carlo paths for exotic structures.
+* **Dynamic Hedging:** A continuous simulation layer that tracks real-time Greek sensitivities ($\Delta, \Gamma, \ Vega, \Theta$), calculating path-dependent P&L leakage during discrete rebalancing under volatile regimes.
+
+---
+
+## 💻 Tech Stack & Tooling
+* **Languages:** C++20 (STL, High-Performance Structs), Python (3.14+)
+* **Libraries:** NumPy, Pandas, SciPy, Scikit-Learn, Statsmodels, Streamlit
+* **Data Pipelines:** SQL (Data Queries/Aggregation), Bloomberg BQL Integration
 
 
 **https://linktr.ee/jaime.ruiz**
 
 Contacto/Contact info:
 **📫 jaimeruiz018@gmail.com**
-
-
-Ideas for next-up tasks
-
-Project A:
-Automate price target scraping to perpetually update portfolio metrics with FactSet professional data. Achievable through the insertion of a Python file into Excel VBA.
-Compare assets using the Sharpe ratio and drawdown metrics.
-Reach actionable conclusions.
-Since the analysis won't just include current positions, but also watchlist companies, multiple decisions can be made, from weight rebalancing to new acquisitions.
-
-STATUS: Done✅
-
-Project B:
-Fixed income price sensitivity simulator. Calculation of a bond's Fair Value and analysis of P&L impact when there is a yield curve shock. Oriented to risk management.
-Simulador de sensibilidad de Renta Fija. Este script calcula el Fair Value de un bono y analiza el impacto en el P&L ante shocks en la curva de tipos, fundamental para el control de riesgos en Tesorería.
-
-STATUS: Done✅
-
-Project C:
-ARIMA with differencing
-
-ARIMA + GARCH to predict risk/volatility
-
-STATUS: Done✅
-
-
-Project D:
-Momentum / mean-reversion strategy + TESTING
-
-MONTECARLO simulation for returns
-
-STATUS: Done✅
-
-
-Project E:
-More advanced machine learning model (LSTM, transformer, or feature-rich regression)
-
-STATUS: got the basics down, halfway through
-
-
-LATEST PROJECTS:
-
-Perpetual **Proprietary** Valuation Screener
-
-Automated Multi-method Valuator
-
-
-For licensing requests, please contact me. I am open to suggestions and collaborations. Thank you for your interest.
