@@ -32,7 +32,7 @@ A derivatives pricing suite featuring cross-method valuation and dynamic risk re
 * **Data Pipelines:** SQL (Data Queries/Aggregation), Bloomberg BQL Integration
 
 
-**https://linktr.ee/jaime.ruiz**
+**(https://www.linkedin.com/in/jaime-ruiz-marín-09a05127b/)**
 
 Contacto/Contact info:
 **📫 jaimeruiz018@gmail.com**
