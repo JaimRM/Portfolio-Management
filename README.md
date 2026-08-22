@@ -4,7 +4,7 @@ A collection of production-grade quantitative trading strategies, financial engi
 Some of my core projects:
 
 ### 1. [Transaction Cost Analysis (TCA) & Execution Simulator](./TCA_Simulator) (C++20)
-An institutional-grade intraday simulator to model market microstructure and optimize algorithmic execution slices.
+An institutional-grade intraday simulator to model market microstructure and optimize algorithmic execution.
 * **Microstructure Model:** Geometric Brownian Motion (GBM) price paths coupled with a **U-shaped intraday volume profile** and an Almgren-Chriss square-root market impact model (temporary vs. permanent impact decay).
 * **Algorithms Implemented:** Naive TWAP, Volume-Tracking VWAP, and **Implementation Shortfall (Almgren-Chriss closed-form optimal trajectory)** trading off timing risk ($\lambda$) against slippage.
 * **Metrics:** Implementation Shortfall (Perold 1988) vs. arrival price, VWAP slippage in bps, and peak participation-rate tracking.
@@ -27,9 +27,9 @@ A derivatives pricing suite featuring cross-method valuation and dynamic risk re
 ---
 
 ## 💻 Tech Stack & Tooling
-* **Languages:** C++20 (STL, High-Performance Structs), Python (3.14+)
+* **Languages:** C++20 (STL, High-Performance Structs), Python (3.14+), VBA (Excel)
 * **Libraries:** NumPy, Pandas, SciPy, Scikit-Learn, Statsmodels, Streamlit
-* **Data Pipelines:** SQL (Data Queries/Aggregation), Bloomberg BQL Integration
+* **Data Pipelines:** SQL (Data Queries/Aggregation), Bloomberg BQL Integration, Financial Modeling Prep, YahooFinance
 
 
 **(https://www.linkedin.com/in/jaime-ruiz-marín-09a05127b/)**
