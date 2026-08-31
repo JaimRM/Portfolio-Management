@@ -1,86 +1,38 @@
-# Transaction Cost Analysis (TCA) & Execution Algorithm Simulator
+A collection of production-grade quantitative trading strategies, financial engineering models, and market microstructure simulators.
 
-A C++17 simulator that models the core toolkit of an **Execution Quant**: simulate a
-realistic trading day, work a large parent order through three execution algorithms
-(TWAP, VWAP, Implementation Shortfall / Almgren-Chriss), and produce a full **Transaction
-Cost Analysis** report comparing them on the standard industry benchmarks.
 
-## Why this project
+Some of my core projects:
 
-Execution desks don't decide *what* to trade — they decide *how* to trade it without
-leaking cost to the market. This project builds the two things that role actually requires
-day to day:
+### 1. [Transaction Cost Analysis (TCA) & Execution Simulator](./TCA_Simulator) (C++20)
+An institutional-grade intraday simulator to model market microstructure and optimize algorithmic execution.
+* **Microstructure Model:** Geometric Brownian Motion (GBM) price paths coupled with a **U-shaped intraday volume profile** and an Almgren-Chriss square-root market impact model (temporary vs. permanent impact decay).
+* **Algorithms Implemented:** Naive TWAP, Volume-Tracking VWAP, and **Implementation Shortfall (Almgren-Chriss closed-form optimal trajectory)** trading off timing risk ($\lambda$) against slippage.
+* **Metrics:** Implementation Shortfall (Perold 1988) vs. arrival price, VWAP slippage in bps, and peak participation-rate tracking.
 
-1. **Market microstructure modeling** — an intraday price/volume simulator with a
-   realistic U-shaped volume profile and a square-root market impact model
-   (temporary + permanent impact, Almgren-Chriss style).
-2. **TCA benchmarking** — Implementation Shortfall (Perold, 1988), VWAP slippage,
-   participation-rate tracking, and spread cost attribution, computed the way a real
-   execution desk or TCA vendor (e.g. ITG, Virtu Analytics) would report them.
+### 2. [Regime-Based Momentum Strategy — FX Majors](./FX_HMM_Momentum) (Python)
+A systematic FX trading strategy gated by a **3-State Gaussian Hidden Markov Model (HMM)** to decouple structural trends from volatility states.
+* **Mathematical Framework:** Baum-Welch (EM) parameter estimation and Forward Algorithm filtering (zero look-ahead bias). Walk-forward expanding windows refitted every 63 trading days.
+* **Risk Management:** Dynamic, regime-conditional stop-losses scaled by daily realized volatility. Regime transitions instantly trigger position-sizing adjustments (Trend High Vol vs. Trend Low Vol vs. Mean-Reverting Range).
 
-## Architecture
+### 3. [Statistical Arbitrage & Pairs Trading Engine](./Statistical_Arbitrage) (Python)
+An end-to-end framework applying cointegration and time-series econometrics to equity pairs.
+* **Methodology:** Two-step Engle-Granger cointegration procedure, Augmented Dickey-Fuller (ADF) testing, and **Ornstein-Uhlenbeck (OU) stochastic process** parameter fitting for precise mean-reversion speed modeling.
+* **Statistical Rigor:** Implements **Bonferroni corrections** to control family-wise error rates during multi-pair mining, backed by out-of-sample walk-forward testing.
 
-```
-include/
-  MarketTypes.hpp          Core data structures: Order, Fill, MarketBar, MarketDay
-  MarketSimulator.hpp      GBM price path + U-shaped intraday volume profile
-  MarketImpactModel.hpp    Square-root temporary/permanent impact model
-  ExecutionAlgorithms.hpp  TWAP, VWAP, Implementation Shortfall (Almgren-Chriss)
-  TCAEngine.hpp            Cost benchmarking: IS, VWAP slippage, participation, spread cost
-  CsvWriter.hpp            Exports fills + summary report to CSV
-src/
-  main.cpp                 Runs all 3 algos against the same simulated day, prints + exports report
-```
+### 4. [Delta-Hedging Options Pricer & Simulator](./Options_Pricer) (Python & Streamlit)
+A derivatives pricing suite featuring cross-method valuation and dynamic risk replication tracking.
+* **Pricing Engines:** Analytical Black-Scholes-Merton, Binomial Trees for American options, and Monte Carlo paths for exotic structures.
+* **Dynamic Hedging:** A continuous simulation layer that tracks real-time Greek sensitivities ($\Delta, \Gamma, \ Vega, \Theta$), calculating path-dependent P&L leakage during discrete rebalancing under volatile regimes.
 
-## Algorithms implemented
+---
 
-- **TWAP** — splits the order into equal-sized slices across the horizon. Simple,
-  ignores real liquidity, used as the naive baseline.
-- **VWAP** — slices proportionally to each bar's share of expected volume, keeping
-  the order's own participation rate roughly flat and tracking the market benchmark.
-- **Implementation Shortfall (Almgren-Chriss)** — solves the closed-form optimal
-  trajectory `x(t) = X · sinh(κ(T−t)) / sinh(κT)` that trades off market impact cost
-  against timing (volatility) risk via a risk-aversion parameter λ. Higher λ trades
-  faster and accepts more impact to reduce exposure to adverse price moves.
+## 💻 Tech Stack & Tooling
+* **Languages:** C++20 (STL, High-Performance Structs), Python (3.14+), VBA (Excel)
+* **Libraries:** NumPy, Pandas, SciPy, Scikit-Learn, Statsmodels, Streamlit
+* **Data Pipelines:** SQL (Data Queries/Aggregation), Bloomberg BQL Integration
 
-## TCA metrics reported
 
-- **Implementation Shortfall (bps & $)** vs. arrival price — the industry-standard
-  execution cost measure (Perold 1988).
-- **VWAP slippage (bps)** — execution price vs. the realized interval market VWAP.
-- **Average / peak participation rate** — % of each bar's volume consumed, a proxy
-  for how much market impact and information leakage the order caused.
-- **Effective spread cost (bps)** — cost attributable purely to crossing the bid-ask.
+**(https://www.linkedin.com/in/jaime-ruiz-marín-09a05127b/)**
 
-## Build & run
-
-```bash
-g++ -std=c++17 -O2 -Wall -Wextra -Iinclude src/main.cpp -o tca_sim
-./tca_sim
-```
-
-Outputs:
-- Console comparison table across the three algorithms.
-- `output/tca_summary.csv` — one row per algorithm with all TCA metrics.
-- `output/fills_<algo>.csv` — full fill-by-fill execution trajectory per algorithm.
-
-## Example result (500k share buy order, 10% of ADV, seed=42)
-
-| Algorithm | Avg Price | IS (bps) | VWAP Slippage (bps) | Avg Participation |
-|---|---|---|---|---|
-| TWAP | 100.37 | 42.3 | 74.2 | 11.7% |
-| VWAP | 100.24 | 30.1 | 61.9 | 10.0% |
-| Implementation Shortfall | 100.35 | 40.3 | 72.1 | 11.0% |
-
-VWAP wins on cost here because it tracks the venue's own liquidity profile; IS trades
-faster than VWAP early in the session to reduce timing risk, accepting a bit more impact
-cost than VWAP but less than naive TWAP.
-
-## Possible extensions
-
-- Replace the synthetic GBM simulator with real tick data (e.g. LOBSTER, Polygon.io).
-- Add a POV (Percentage of Volume) algorithm and an adaptive/Almgren-Chriss-with-real-time
-  re-optimization variant.
-- Model queue position / partial fills against a real limit order book instead of a
-  reduced-form impact model.
-- Add pre-trade cost estimation (predicting IS before execution) vs. post-trade TCA.
+Contacto/Contact info:
+**📫 jaimeruiz018@gmail.com**
