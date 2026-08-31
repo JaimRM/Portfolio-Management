@@ -1,0 +1,20 @@
+2026-08-06 15:14:03 | INFO | HTTP Request: GET https://financialmodelingprep.com/stable/quote?symbol=AAPL&apikey=xi7IGuHipNB4H6FuWcctxKy1GbOLg9R5 "HTTP/1.1 200 OK"
+2026-08-06 15:14:03 | INFO | CONSULTA FMP EXITOSA: Se sirvió el precio en tiempo real de AAPL.
+2026-08-06 15:14:42 | INFO | HTTP Request: GET https://financialmodelingprep.com/stable/quote?symbol=MSFT&apikey=xi7IGuHipNB4H6FuWcctxKy1GbOLg9R5 "HTTP/1.1 200 OK"
+2026-08-06 15:14:42 | INFO | CONSULTA FMP EXITOSA: Se sirvió el precio en tiempo real de MSFT.
+2026-08-06 15:14:51 | INFO | HTTP Request: GET https://financialmodelingprep.com/stable/quote?symbol=DHT&apikey=xi7IGuHipNB4H6FuWcctxKy1GbOLg9R5 "HTTP/1.1 402 Payment Required"
+2026-08-06 15:14:51 | ERROR | FALLO DE RESPUESTA FMP: Código de estado 402 para 'DHT'.
+2026-08-06 15:14:51 | ERROR | ERROR INTERNO: 402: Error en la respuesta del proveedor externo.
+2026-08-06 15:15:06 | INFO | HTTP Request: GET https://financialmodelingprep.com/stable/quote?symbol=SPCX&apikey=xi7IGuHipNB4H6FuWcctxKy1GbOLg9R5 "HTTP/1.1 402 Payment Required"
+2026-08-06 15:15:06 | ERROR | FALLO DE RESPUESTA FMP: Código de estado 402 para 'SPCX'.
+2026-08-06 15:15:06 | ERROR | ERROR INTERNO: 402: Error en la respuesta del proveedor externo.
+2026-08-06 15:15:12 | INFO | HTTP Request: GET https://financialmodelingprep.com/stable/quote?symbol=GOOG&apikey=xi7IGuHipNB4H6FuWcctxKy1GbOLg9R5 "HTTP/1.1 402 Payment Required"
+2026-08-06 15:15:12 | ERROR | FALLO DE RESPUESTA FMP: Código de estado 402 para 'GOOG'.
+2026-08-06 15:15:12 | ERROR | ERROR INTERNO: 402: Error en la respuesta del proveedor externo.
+2026-08-06 15:15:19 | INFO | HTTP Request: GET https://financialmodelingprep.com/stable/quote?symbol=NVDA&apikey=xi7IGuHipNB4H6FuWcctxKy1GbOLg9R5 "HTTP/1.1 200 OK"
+2026-08-06 15:15:19 | INFO | CONSULTA FMP EXITOSA: Se sirvió el precio en tiempo real de NVDA.
+2026-08-06 15:15:27 | INFO | HTTP Request: GET https://financialmodelingprep.com/stable/quote?symbol=GOOGL&apikey=xi7IGuHipNB4H6FuWcctxKy1GbOLg9R5 "HTTP/1.1 200 OK"
+2026-08-06 15:15:27 | INFO | CONSULTA FMP EXITOSA: Se sirvió el precio en tiempo real de GOOGL.
+2026-08-06 15:15:34 | INFO | HTTP Request: GET https://financialmodelingprep.com/stable/quote?symbol=O&apikey=xi7IGuHipNB4H6FuWcctxKy1GbOLg9R5 "HTTP/1.1 402 Payment Required"
+2026-08-06 15:15:34 | ERROR | FALLO DE RESPUESTA FMP: Código de estado 402 para 'O'.
+2026-08-06 15:15:34 | ERROR | ERROR INTERNO: 402: Error en la respuesta del proveedor externo.
