@@ -1,38 +1,106 @@
-A collection of production-grade quantitative trading strategies, financial engineering models, and market microstructure simulators.
+# Statistical Arbitrage — Pairs Trading
 
+Cointegration-based pairs trading engine: screens a universe for
+statistically valid pairs, models the spread as an Ornstein-Uhlenbeck
+process, generates z-score entry/exit signals, and backtests with
+transaction costs and no look-ahead bias.
 
-Some of my core projects:
+## Architecture
 
-### 1. [Transaction Cost Analysis (TCA) & Execution Simulator](./TCA_Simulator) (C++20)
-An institutional-grade intraday simulator to model market microstructure and optimize algorithmic execution.
-* **Microstructure Model:** Geometric Brownian Motion (GBM) price paths coupled with a **U-shaped intraday volume profile** and an Almgren-Chriss square-root market impact model (temporary vs. permanent impact decay).
-* **Algorithms Implemented:** Naive TWAP, Volume-Tracking VWAP, and **Implementation Shortfall (Almgren-Chriss closed-form optimal trajectory)** trading off timing risk ($\lambda$) against slippage.
-* **Metrics:** Implementation Shortfall (Perold 1988) vs. arrival price, VWAP slippage in bps, and peak participation-rate tracking.
+```
+pairs_trading/
+├── config.py             ScreeningConfig, StrategyConfig, BacktestConfig
+├── data_loader.py         price data (yfinance; can swap for Bloomberg/internal feed)
+├── cointegration.py       Engle-Granger test + OLS hedge ratio
+├── spread_analysis.py     spread, rolling z-score, OU parameter estimation
+├── screener.py             scans a universe, ranks tradeable pairs
+├── strategy.py              z-score state machine -> position series
+├── backtest.py              vectorized P&L, Sharpe, drawdown, win rate
+└── main.py                    example end-to-end run
+```
 
-### 2. [Regime-Based Momentum Strategy — FX Majors](./FX_HMM_Momentum) (Python)
-A systematic FX trading strategy gated by a **3-State Gaussian Hidden Markov Model (HMM)** to decouple structural trends from volatility states.
-* **Mathematical Framework:** Baum-Welch (EM) parameter estimation and Forward Algorithm filtering (zero look-ahead bias). Walk-forward expanding windows refitted every 63 trading days.
-* **Risk Management:** Dynamic, regime-conditional stop-losses scaled by daily realized volatility. Regime transitions instantly trigger position-sizing adjustments (Trend High Vol vs. Trend Low Vol vs. Mean-Reverting Range).
+## The math
 
-### 3. [Statistical Arbitrage & Pairs Trading Engine](./Statistical_Arbitrage) (Python)
-An end-to-end framework applying cointegration and time-series econometrics to equity pairs.
-* **Methodology:** Two-step Engle-Granger cointegration procedure, Augmented Dickey-Fuller (ADF) testing, and **Ornstein-Uhlenbeck (OU) stochastic process** parameter fitting for precise mean-reversion speed modeling.
-* **Statistical Rigor:** Implements **Bonferroni corrections** to control family-wise error rates during multi-pair mining, backed by out-of-sample walk-forward testing.
+**1. Cointegration (Engle-Granger, two-step).**
+Two I(1) (random-walk) price series `y_t`, `x_t` are cointegrated if some
+linear combination is stationary:
 
-### 4. [Delta-Hedging Options Pricer & Simulator](./Options_Pricer) (Python & Streamlit)
-A derivatives pricing suite featuring cross-method valuation and dynamic risk replication tracking.
-* **Pricing Engines:** Analytical Black-Scholes-Merton, Binomial Trees for American options, and Monte Carlo paths for exotic structures.
-* **Dynamic Hedging:** A continuous simulation layer that tracks real-time Greek sensitivities ($\Delta, \Gamma, \ Vega, \Theta$), calculating path-dependent P&L leakage during discrete rebalancing under volatile regimes.
+```
+y_t = alpha + beta * x_t + eps_t,      eps_t ~ I(0)
+```
 
----
+`beta` is estimated by OLS (the hedge ratio); `eps_t` (the spread) is
+then tested for a unit root via Augmented Dickey-Fuller. We require both
+`statsmodels.tsa.stattools.coint` (correct MacKinnon critical values) and
+a direct ADF on the residuals to reject the null of a unit root.
 
-## 💻 Tech Stack & Tooling
-* **Languages:** C++20 (STL, High-Performance Structs), Python (3.14+), VBA (Excel)
-* **Libraries:** NumPy, Pandas, SciPy, Scikit-Learn, Statsmodels, Streamlit
-* **Data Pipelines:** SQL (Data Queries/Aggregation), Bloomberg BQL Integration
+**2. Spread dynamics (Ornstein-Uhlenbeck).**
+```
+dS_t = theta (mu - S_t) dt + sigma dW_t
+```
+Estimated via the AR(1) regression `S_t - S_{t-1} = a + b S_{t-1} + eps`,
+giving `theta = -b/dt`, `mu = -a/b`, and half-life `= ln(2)/theta`; the
+expected number of periods for the spread to revert halfway to its mean.
+This half-life is the natural scale for both the z-score lookback window
+and the expected holding period.
 
+**3. Signal.** Rolling z-score of the spread; enter at `|z| > entry`,
+exit at `|z| < exit`, hard stop at `|z| > stop` (protects against the
+cointegration relationship itself breaking down).
 
-**(https://www.linkedin.com/in/jaime-ruiz-marín-09a05127b/)**
+## Known statistical risk: spurious cointegration
 
-Contacto/Contact info:
-**📫 jaimeruiz018@gmail.com**
+Screening N tickers tests `N(N-1)/2` pairs simultaneously. At a flat 5%
+significance level this produces false positives at a much higher rate
+than 5% overall. `ScreeningConfig.bonferroni_correction` (on by default)
+divides the significance threshold by the number of pairs tested.
+
+**This is not sufficient on its own.** Engle-Granger/ADF tests have
+known finite-sample size distortion. Even fully independent random
+walks can occasionally clear a Bonferroni-corrected threshold (verified
+in `test_pipeline.py`). We should never select a pair by p-value alone; always
+require an economic rationale (same sector, shared risk factor, ADR /
+share-class relationship) on top of the statistical filter.
+
+## Usage
+
+```bash
+pip install -r requirements.txt
+python -m pairs_trading.main
+```
+
+```python
+from pairs_trading import (
+    fetch_close_prices, screen_pairs, test_cointegration,
+    compute_spread, rolling_zscore, generate_positions, run_backtest,
+    ScreeningConfig, StrategyConfig, BacktestConfig,
+)
+
+prices = fetch_close_prices(["KO", "PEP"], start="2019-01-01")
+candidates = screen_pairs(prices, ScreeningConfig())
+
+y, x = prices["KO"], prices["PEP"]
+coint = test_cointegration(y, x)
+spread = compute_spread(y, x, coint.hedge_ratio, coint.intercept)
+z = rolling_zscore(spread, window=21)
+positions = generate_positions(z, StrategyConfig())
+
+result = run_backtest(y, x, coint.hedge_ratio, positions, **BacktestConfig().__dict__)
+print(result.summary())
+```
+
+## Design notes / next steps for production
+
+- **Hedge ratio drift**: this implementation uses a static, full-sample
+  OLS beta. In production, re-estimate on a rolling or Kalman-filtered
+  basis (`BacktestConfig.hedge_ratio_window` is a placeholder for this)
+  so the hedge tracks a slowly time-varying relationship.
+- **Walk-forward validation**: screen on an in-sample window, trade
+  out-of-sample, and re-screen periodically. This codebase screens and
+  backtests on the same window for clarity.
+- **Execution realism**: costs here are a flat bps/turnover proxy; a
+  production version should model bid-ask spread and market impact
+  separately, especially for less liquid legs.
+- **Portfolio level**: run the screener across sectors, allocate capital
+  across the surviving pairs with a risk budget (e.g. equal risk
+  contribution on each pair's OU-implied volatility), not equal notional.
