@@ -8,6 +8,6 @@ p = np.array([27.10, 25.70, 24.60, 21.30, 16.80, 18.20, 24.00, 30.90, 24.50, 32.
 slope_ln, intercept_ln, r_val_ln, p_val_ln, std_err_ln = stats.linregress(t, np.log(p))
 print(f"Natural Log (ln): Intercept={intercept_ln:.4f}, Slope={slope_ln:.4f}")
 
-# Common Log (log10)
+# Common Log (log10)w
 slope_log10, intercept_log10, r_val_log10, p_val_log10, std_err_log10 = stats.linregress(t, np.log10(p))
 print(f"Common Log (log10): Intercept={intercept_log10:.4f}, Slope={slope_log10:.4f}")
