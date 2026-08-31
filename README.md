@@ -1,40 +1,99 @@
-# Derivatives Pricing & Dynamic Hedging Simulator
+# Regime-Based Momentum Strategy — FX Majors
 
-Simulador de fijación de precios de derivados y cobertura dinámica (Delta Hedging), construido en Python con interfaz Streamlit.
+A Hidden Markov Model (HMM) classifies major FX pairs (EUR/USD, USD/JPY) into
+latent market regimes in real time; a momentum signal is then gated, sized,
+and stopped-out based on the model's regime read.
 
-## Estructura
+## Method
 
-| Archivo | Contenido |
-|---|---|
-| `black_scholes.py` | Fórmula cerrada BSM + Griegas analíticas (Δ, Γ, Θ, Vega, Rho) |
-| `binomial_tree.py` | Árbol CRR para opciones americanas/europeas + Griegas leídas del árbol |
-| `monte_carlo.py` | Simulación GBM (solución exacta vía Itô), payoffs europeo/asiático/barrera, Griegas por diferencias finitas con common random numbers |
-| `hedging_simulator.py` | Motor de cobertura Delta dinámica: cartera autofinanciada, rebalanceo discreto, distribución del error de cobertura |
-| `app.py` | Interfaz Streamlit con 3 pestañas: Pricing & Griegas / Delta Hedging en vivo / Estudio de frecuencia |
+### 1. Regime detection (`hmm_regime.py`) — 3-state HMM
 
-## Matemáticas aplicadas
+A **3-state** Gaussian HMM is fit on `(log return, realized volatility)`,
+separating:
 
-- **Lema de Itô**: base de la dinámica `dS = (r-q)S dt + σS dW` y de la expansión de `dV(S,t)` usada tanto en la derivación de Black-Scholes como en la contabilidad de la cartera de cobertura paso a paso.
-- **PDE de Black-Scholes**: `∂V/∂t + (r-q)S ∂V/∂S + ½σ²S² ∂²V/∂S² - rV = 0`, resuelta en forma cerrada para vanillas europeas.
-- **Monte Carlo**: integración numérica de `E^Q[e^{-rT} payoff(S_T)]` usando la solución exacta del GBM, con reducción de varianza (antitéticas) y Griegas vía diferencias finitas centradas con semillas comunes.
-- **Árbol binomial CRR**: aproximación discreta del proceso continuo que converge a Black-Scholes cuando N→∞; permite ejercicio anticipado (americanas).
+- `trend_high_vol` — directional, volatile
+- `trend_low_vol` — directional, quiet
+- `range` — non-directional
 
-## Cómo ejecutar
+A 2-state model conflates "am I trending" with "how volatile is it," which
+then gets double-counted once position sizing *also* scales by realized vol.
+Separating them lets the strategy size a calm trend and a volatile trend
+differently rather than treating "trend" as one bucket.
+
+- Transition matrix `A`: `P(S_t = j | S_{t-1} = i)`
+- Emissions: `x_t | S_t = i ~ N(mu_i, Sigma_i)`
+- Parameters estimated via Baum-Welch (EM); state probabilities via the
+  forward algorithm (filtered, not smoothed — no future data used).
+- **Walk-forward re-estimation**: refit every ~63 trading days on an
+  expanding window, so no future data leaks into past regime calls.
+- State labels are assigned automatically each refit by ranking states on
+  `|mean return|` (trend vs range) and then `mean realized_vol` (high vs low
+  vol among the trend states) — not hardcoded to a fixed state index, since
+  which index means what can shift between refits.
+
+### 2. Signal, sizing & regime-conditional stop-loss (`backtest.py`)
+
+- Momentum direction: sign of cumulative log return over a lookback window.
+- Trade only when `P(trend_high_vol) + P(trend_low_vol) >= p_trend_threshold`.
+- Size = `clip(target_vol / realized_vol, 0, max_leverage) * P(trend)`.
+- **Stop-loss is regime-conditional, not a fixed percentage**:
+  - `range` → any open position is closed immediately — the model no longer
+    believes there's a trend to ride.
+  - `trend_high_vol` → wide stop (a pullback is more likely just noise inside
+    a strong, volatile trend).
+  - `trend_low_vol` → tighter stop (the same-sized pullback is a bigger
+    relative signal that a quiet trend may be exhausted).
+  - Stop level = a multiple of realized volatility **at entry** (daily-scaled),
+    checked against cumulative unrealized log-return since entry. This is a
+    sequential/path-dependent rule (implemented as a single pass, not a
+    vector op).
+- Transaction costs charged in bps of turnover.
+
+### 3. Walk-forward hyperparameter search (`hyperparam_search.py`)
+
+Grid search over `momentum_window x p_trend_threshold`, validated the same
+way as the refit-cadence optimization in the BTC/Gold ARIMA/GARCH pipeline:
+
+- Expanding training window, fixed-size out-of-sample test block per fold.
+- Best params picked by **in-sample** Sharpe on the training slice only.
+- Those params are then applied to the **next, unseen** test block and
+  scored out-of-sample — every reported OOS metric is genuinely OOS.
+- A `full_sample_heatmap()` helper is included too, but it's explicitly
+  labeled diagnostic-only (it has look-ahead in the parameter choice) — useful
+  for sanity-checking the grid range, never for picking a "final" parameter.
+
+`main.py` runs this search per pair, then re-runs the final backtest using
+the most frequently chosen parameters across folds (a simple, defensible way
+to pick one parameter set from a walk-forward study without cherry-picking
+the single best fold).
+
+## Usage
 
 ```bash
 pip install -r requirements.txt
-streamlit run app.py
+python main.py
 ```
 
-## Validaciones incluidas
+Set `RUN_GRID_SEARCH = False` in `main.py` for a faster run using default
+parameters — the grid search is the slowest step (multiple HMM-free but
+repeated backtests per fold).
 
-- El árbol binomial europeo converge al precio de Black-Scholes al aumentar N.
-- Monte Carlo europeo coincide con Black-Scholes dentro del intervalo de confianza del 95%.
-- El error de cobertura (P&L de la cartera replicante vs payoff pagado) decrece al aumentar la frecuencia de rebalanceo, consistente con la teoría de replicación continua.
-- Si la volatilidad realizada difiere de la implícita usada para calcular Delta, el emisor de la opción incurre en un sesgo sistemático de P&L (ganancia si vol realizada < implícita para el vendedor, y viceversa) — demostrable activando el toggle de "vol mismatch" en la pestaña de hedging.
+Outputs:
+- `regime_momentum_summary.csv` — strategy vs buy & hold metrics, both pairs
+- `regime_momentum_results.png` — equity curves, regime shading, stop-out markers
+- `grid_search_EURUSD.csv`, `grid_search_USDJPY.csv` — per-fold walk-forward results
 
-## Próximas extensiones sugeridas
+## Known limitations / next steps
 
-- Gamma hedging (cobertura de segundo orden con otra opción)
-- Superficie de volatilidad implícita (skew/smile) en lugar de σ constante
-- Opciones sobre múltiples activos (cesta, spread) vía Monte Carlo multivariado con correlación
+- The stop-loss's mark-to-market uses a same-day return proxy
+  (`current_pos * ret[t]`) rather than the same t→t+1 execution lag used for
+  the rest of the backtest. This is a standard simplification for risk
+  control (react same-day, execute same-day) but means the stop-loss P&L
+  tracking and the accounted strategy return aren't on identical timing —
+  worth tightening if this becomes an execution-relevant deliverable rather
+  than a research prototype.
+- Grid search currently optimizes two parameters (`momentum_window`,
+  `p_trend_threshold`); the stop-loss multipliers themselves are not yet part
+  of the search space.
+- HMM state count is fixed at 3; a model-selection step (BIC/AIC across
+  n_states) would make that choice data-driven rather than assumed.

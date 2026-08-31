@@ -1,5 +1,5 @@
-numpy
-scipy
-pandas
-streamlit
-plotly
+hmmlearn>=0.3.0
+yfinance>=0.2.40
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.7
